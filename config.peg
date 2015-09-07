@@ -1,0 +1,26 @@
+package gitconfig
+
+type config Peg {
+  sections   []*Section
+  curSection *Section
+  curKey     string
+}
+
+Grammar <- (SpaceComment / Section)+
+
+Section <- Space* '[' Space* <Identifier> { p.addSection(text) }
+           (Space+ '"' <Identifier> { p.setID(text) } '"')?
+           Space* ']' SpaceComment ValueLine*
+
+ValueLine <- Space* <Identifier> { p.setKey(text) }
+             Space* '=' Space* <Value> { p.addValue(text) }
+             SpaceComment
+Value     <- Word (Space+ Word)*
+
+Identifier <- [[a-z0-9_\-@.]]+
+Word       <- [^ \t#\r\n]+
+
+SpaceComment  <- (Space+ / Comment / EndOfLine)
+Comment       <- '#' (!EndOfLine .)* EndOfLine
+Space         <- ' ' / '\t'
+EndOfLine     <- '\r\n' / '\n' / '\r'
